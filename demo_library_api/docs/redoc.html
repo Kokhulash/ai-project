@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Library API - API Reference</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <redoc spec-url="" id="redoc-container"></redoc>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <script>
+    const spec = {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Book Library API",
+    "version": "1.0.0",
+    "description": "API for managing books and facilitating the borrowing and returning of books by users in a library system. It allows users to browse available books, borrow them, and return them, while also providing administrative functions for managing the book catalog."
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Books",
+      "description": "Operations related to managing books in the library catalog."
+    },
+    {
+      "name": "Users",
+      "description": "Operations related to user registration and profile management."
+    },
+    {
+      "name": "Borrowings",
+      "description": "Operations related to borrowing and returning books."
+    }
+  ],
+  "paths": {
+    "/books": {
+      "get": {
+        "operationId": "listBooks",
+        "summary": "Retrieve a list of all books",
+        "description": "Returns a paginated list of all books available in the library. Can be filtered by title, author, or genre, and sorted. Rule 1: A book can only be borrowed if its 'availableCopies' is greater than 0.",
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of items to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Filter books by title (partial match).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "description": "Filter books by author (partial match).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Filter books by genre.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of books.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBook",
+        "summary": "Add a new book to the library catalog",
+        "description": "Allows library staff to add a new book entry to the system. Initial 'availableCopies' will be set to 'totalCopies'. Rule 7: Only library staff or administrators are authorized to add, update, or delete books. Rule 8: The 'isbn' field must be unique across all books in the library. Rule 10: Upon adding a new book, 'availableCopies' must be initialized to 'totalCopies'.",
+        "tags": [
+          "Books"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Book data to add to the catalog.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid book data provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/books/{book_id}": {
+      "get": {
+        "operationId": "getBookById",
+        "summary": "Retrieve a specific book by ID",
+        "description": "Returns the details of a single book identified by its unique ID.",
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "book_id",
+            "in": "path",
+            "description": "Unique identifier of the book.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid book ID format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBook",
+        "summary": "Update an existing book's details",
+        "description": "Allows library staff to fully update the details of an existing book. Requires all fields to be provided (excluding system-managed fields like 'availableCopies'). Rule 7: Only library staff or administrators are authorized to add, update, or delete books. Rule 8: The 'isbn' field must be unique across all books in the library.",
+        "tags": [
+          "Books"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "book_id",
+            "in": "path",
+            "description": "Unique identifier of the book to update.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated book data. All fields defined in the schema are required for a PUT operation to fully replace the resource.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Book successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid book data provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBook",
+        "summary": "Remove a book from the library catalog",
+        "description": "Allows library staff to remove a book from the system. This operation might be restricted if there are active borrowings for the book. Rule 7: Only library staff or administrators are authorized to add, update, or delete books.",
+        "tags": [
+          "Books"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "book_id",
+            "in": "path",
+            "description": "Unique identifier of the book to delete.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource deleted successfully"
+          },
+          "400": {
+            "description": "Invalid book ID format or book cannot be deleted due to active borrowings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "registerUser",
+        "summary": "Register a new user",
+        "description": "Allows a new user to register for a library account. Rule 9: The 'username' and 'email' fields must be unique for each user.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "description": "User registration data.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user data provided (e.g., duplicate username/email).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "operationId": "getUserById",
+        "summary": "Retrieve a specific user's profile",
+        "description": "Returns the profile details of a user. A user can retrieve their own profile, and administrators can retrieve any user's profile.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "Unique identifier of the user.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/borrowings": {
+      "get": {
+        "operationId": "listBorrowings",
+        "summary": "Retrieve a list of borrowing records",
+        "description": "Returns a list of borrowing records. For regular users, this lists their own borrowings. For administrators, it lists all borrowings. Can be filtered by user, book, or status.",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of items to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "Filter borrowings by user ID (admin only).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "bookId",
+            "in": "query",
+            "description": "Filter borrowings by book ID.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter borrowings by status.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "borrowed",
+                "returned",
+                "overdue"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of borrowing records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BorrowingListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "borrowBook",
+        "summary": "Borrow a book",
+        "description": "Allows an authenticated user to borrow an available book. The 'userId' is derived from the authentication token. Rule 1: A book can only be borrowed if its 'availableCopies' is greater than 0. Rule 2: When a book is borrowed, the 'availableCopies' for that book must decrease by 1. Rule 4: A user cannot have multiple active (not returned) borrowing records for the same book (identified by 'bookId'). Rule 5: The 'dueDate' for a borrowing is automatically calculated (e.g., 14 days from 'borrowDate'). Rule 6: Only authenticated users can borrow or return books.",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Book ID to borrow.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BorrowingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book successfully borrowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Borrowing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., book not available, already borrowed).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/borrowings/{borrowing_id}": {
+      "get": {
+        "operationId": "getBorrowingById",
+        "summary": "Retrieve a specific borrowing record",
+        "description": "Returns the details of a single borrowing record identified by its unique ID. Users can only access their own records.",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "borrowing_id",
+            "in": "path",
+            "description": "Unique identifier of the borrowing record.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Borrowing record details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Borrowing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid borrowing ID format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Borrowing record not found or not accessible by user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/borrowings/{borrowing_id}/return": {
+      "patch": {
+        "operationId": "returnBook",
+        "summary": "Return a borrowed book",
+        "description": "Allows an authenticated user to mark a previously borrowed book as returned. Updates the borrowing record and book availability. Rule 3: When a book is returned, the 'availableCopies' for that book must increase by 1. Rule 6: Only authenticated users can borrow or return books.",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "borrowing_id",
+            "in": "path",
+            "description": "Unique identifier of the borrowing record to mark as returned.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book successfully returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Borrowing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., book already returned, not due for return).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Borrowing record not found or not associated with the authenticated user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "title": "Book",
+        "description": "Represents a book available in the library, including its details and availability.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the book.",
+            "readOnly": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the book.",
+            "example": "sample_title"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the book.",
+            "example": "sample_author"
+          },
+          "isbn": {
+            "type": "string",
+            "description": "The International Standard Book Number (ISBN), must be unique.",
+            "pattern": "^(?:ISBN(?:-13)?:?)(?=[0-9]{13}$)([0-9]{3}-){2}[0-9]{3}[0-9X]$",
+            "example": "sample_isbn"
+          },
+          "publicationYear": {
+            "type": "integer",
+            "description": "The year the book was published.",
+            "minimum": 1000,
+            "maximum": 9999,
+            "example": 101
+          },
+          "genre": {
+            "type": "string",
+            "description": "The genre of the book (e.g., 'Fiction', 'Science', 'History').",
+            "example": "sample_genre"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "description": "The total number of copies of this book owned by the library.",
+            "minimum": 0,
+            "example": 101
+          },
+          "availableCopies": {
+            "type": "integer",
+            "description": "The number of copies currently available for borrowing. This field is system-managed.",
+            "minimum": 0,
+            "readOnly": true,
+            "example": 101
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "author",
+          "isbn",
+          "publicationYear",
+          "genre",
+          "totalCopies",
+          "availableCopies"
+        ],
+        "example": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "title": "sample_title",
+          "author": "sample_author",
+          "isbn": "sample_isbn",
+          "publicationYear": 101,
+          "genre": "sample_genre",
+          "totalCopies": 101,
+          "availableCopies": 101
+        }
+      },
+      "BookCreate": {
+        "type": "object",
+        "title": "BookCreate",
+        "description": "Data required to add a new book to the library catalog. 'availableCopies' will be initialized to 'totalCopies' by the system.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the book.",
+            "example": "sample_title"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the book.",
+            "example": "sample_author"
+          },
+          "isbn": {
+            "type": "string",
+            "description": "The International Standard Book Number (ISBN), must be unique.",
+            "pattern": "^(?:ISBN(?:-13)?:?)(?=[0-9]{13}$)([0-9]{3}-){2}[0-9]{3}[0-9X]$",
+            "example": "sample_isbn"
+          },
+          "publicationYear": {
+            "type": "integer",
+            "description": "The year the book was published.",
+            "minimum": 1000,
+            "maximum": 9999,
+            "example": 101
+          },
+          "genre": {
+            "type": "string",
+            "description": "The genre of the book (e.g., 'Fiction', 'Science', 'History').",
+            "example": "sample_genre"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "description": "The total number of copies of this book owned by the library.",
+            "minimum": 1,
+            "example": 101
+          }
+        },
+        "required": [
+          "title",
+          "author",
+          "isbn",
+          "publicationYear",
+          "genre",
+          "totalCopies"
+        ],
+        "example": {
+          "title": "sample_title",
+          "author": "sample_author",
+          "isbn": "sample_isbn",
+          "publicationYear": 101,
+          "genre": "sample_genre",
+          "totalCopies": 101
+        }
+      },
+      "BookUpdate": {
+        "type": "object",
+        "title": "BookUpdate",
+        "description": "Data required to fully update an existing book. All fields are required for a PUT operation, excluding system-managed fields like 'availableCopies'.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the book.",
+            "example": "sample_title"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the book.",
+            "example": "sample_author"
+          },
+          "isbn": {
+            "type": "string",
+            "description": "The International Standard Book Number (ISBN), must be unique.",
+            "pattern": "^(?:ISBN(?:-13)?:?)(?=[0-9]{13}$)([0-9]{3}-){2}[0-9]{3}[0-9X]$",
+            "example": "sample_isbn"
+          },
+          "publicationYear": {
+            "type": "integer",
+            "description": "The year the book was published.",
+            "minimum": 1000,
+            "maximum": 9999,
+            "example": 101
+          },
+          "genre": {
+            "type": "string",
+            "description": "The genre of the book (e.g., 'Fiction', 'Science', 'History').",
+            "example": "sample_genre"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "description": "The total number of copies of this book owned by the library.",
+            "minimum": 0,
+            "example": 101
+          }
+        },
+        "required": [
+          "title",
+          "author",
+          "isbn",
+          "publicationYear",
+          "genre",
+          "totalCopies"
+        ],
+        "example": {
+          "title": "sample_title",
+          "author": "sample_author",
+          "isbn": "sample_isbn",
+          "publicationYear": 101,
+          "genre": "sample_genre",
+          "totalCopies": 101
+        }
+      },
+      "BookListResponse": {
+        "type": "object",
+        "title": "BookListResponse",
+        "description": "Paginated list of books.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Book"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of items matching the query.",
+            "example": 101
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of items requested.",
+            "example": 101
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The number of items skipped.",
+            "example": 101
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "example": {
+          "items": [],
+          "total": 101,
+          "limit": 101,
+          "offset": 101
+        }
+      },
+      "User": {
+        "type": "object",
+        "title": "User",
+        "description": "Represents a library user who can authenticate and borrow books.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the user.",
+            "readOnly": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "username": {
+            "type": "string",
+            "description": "Unique username for the user.",
+            "minLength": 3,
+            "example": "sample_username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Unique email address for the user.",
+            "example": "sample_email"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The user's first name.",
+            "example": "sample_firstName"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The user's last name.",
+            "example": "sample_lastName"
+          },
+          "registrationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the user registered.",
+            "readOnly": true,
+            "example": "2026-01-01T00:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email",
+          "firstName",
+          "lastName",
+          "registrationDate"
+        ],
+        "example": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "username": "sample_username",
+          "email": "sample_email",
+          "firstName": "sample_firstName",
+          "lastName": "sample_lastName",
+          "registrationDate": "2026-01-01T00:00:00Z"
+        }
+      },
+      "UserCreate": {
+        "type": "object",
+        "title": "UserCreate",
+        "description": "Data required to register a new user. 'username' and 'email' must be unique.",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Unique username for the user.",
+            "minLength": 3,
+            "example": "sample_username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Unique email address for the user.",
+            "example": "sample_email"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The user's first name.",
+            "example": "sample_firstName"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The user's last name.",
+            "example": "sample_lastName"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "firstName",
+          "lastName"
+        ],
+        "example": {
+          "username": "sample_username",
+          "email": "sample_email",
+          "firstName": "sample_firstName",
+          "lastName": "sample_lastName"
+        }
+      },
+      "UserListResponse": {
+        "type": "object",
+        "title": "UserListResponse",
+        "description": "Paginated list of users.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of items matching the query.",
+            "example": 101
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of items requested.",
+            "example": 101
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The number of items skipped.",
+            "example": 101
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "example": {
+          "items": [],
+          "total": 101,
+          "limit": 101,
+          "offset": 101
+        }
+      },
+      "Borrowing": {
+        "type": "object",
+        "title": "Borrowing",
+        "description": "Records an instance of a user borrowing a specific book, including borrow/return dates and status.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the borrowing record.",
+            "readOnly": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "bookId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the borrowed book.",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the user who borrowed the book.",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the book was borrowed.",
+            "readOnly": true,
+            "example": "2026-01-01T00:00:00Z"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the book is due to be returned. Automatically calculated.",
+            "readOnly": true,
+            "example": "2026-01-01T00:00:00Z"
+          },
+          "returnDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the book was actually returned. Null if not yet returned.",
+            "nullable": true,
+            "example": "2026-01-01T00:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "description": "The current status of the borrowing record.",
+            "enum": [
+              "borrowed",
+              "returned",
+              "overdue"
+            ],
+            "readOnly": true,
+            "example": "sample_status"
+          }
+        },
+        "required": [
+          "id",
+          "bookId",
+          "userId",
+          "borrowDate",
+          "dueDate",
+          "status"
+        ],
+        "example": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "bookId": "00000000-0000-0000-0000-000000000000",
+          "userId": "00000000-0000-0000-0000-000000000000",
+          "borrowDate": "2026-01-01T00:00:00Z",
+          "dueDate": "2026-01-01T00:00:00Z",
+          "returnDate": "2026-01-01T00:00:00Z",
+          "status": "sample_status"
+        }
+      },
+      "BorrowingCreate": {
+        "type": "object",
+        "title": "BorrowingCreate",
+        "description": "Data required to borrow a book. The 'userId' is derived from the authentication token.",
+        "properties": {
+          "bookId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the book to borrow.",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "required": [
+          "bookId"
+        ],
+        "example": {
+          "bookId": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "BorrowingListResponse": {
+        "type": "object",
+        "title": "BorrowingListResponse",
+        "description": "Paginated list of borrowing records.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Borrowing"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of items matching the query.",
+            "example": 101
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of items requested.",
+            "example": 101
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The number of items skipped.",
+            "example": 101
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "example": {
+          "items": [],
+          "total": 101,
+          "limit": 101,
+          "offset": 101
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "title": "ErrorResponse",
+        "description": "Standard error response format.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "A short, human-readable summary of the problem type.",
+            "example": "sample_title"
+          },
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code generated by the origin server for this occurrence of the problem.",
+            "example": 101
+          },
+          "detail": {
+            "type": "string",
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "example": "sample_detail"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.",
+            "example": "sample_instance"
+          }
+        },
+        "required": [
+          "title",
+          "status",
+          "detail"
+        ],
+        "example": {
+          "title": "sample_title",
+          "status": 101,
+          "detail": "sample_detail",
+          "instance": "sample_instance"
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT (JSON Web Token) based authentication. A valid JWT must be provided in the 'Authorization' header as 'Bearer <token>'."
+      }
+    }
+  }
+};
+    Redoc.init(spec, {}, document.getElementById('redoc-container'));
+  </script>
+</body>
+</html>

@@ -48,6 +48,9 @@ Perform semantic and security audit:"""
 
         try:
             items = self.llm.generate_json(prompt, system_prompt=SEMANTIC_AUDIT_PROMPT)
+            if isinstance(items, dict):
+                items = items.get("findings", [items])
+            
             if isinstance(items, list):
                 findings = []
                 for it in items:

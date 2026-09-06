@@ -1,6 +1,6 @@
-# Book Management API
+# E-Commerce Product and Order Management API
 
-API for managing a collection of books, allowing for creation, retrieval, updating, and deletion of book records. It supports tracking book details like title, author, ISBN, publication year, genre, and copy availability.
+API for managing products available for sale and customer orders within an e-commerce system. It supports product catalog management, including creation, retrieval, update, and deletion of products, as well as the full lifecycle of customer orders, from creation to status updates and cancellation.
 
 Designed and generated using **APIForge AI** multi-agent framework.
 
