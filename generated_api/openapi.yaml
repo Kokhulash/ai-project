@@ -1,0 +1,600 @@
+openapi: 3.1.0
+info:
+  title: Book Management API
+  version: 1.0.0
+  description: API for managing a collection of books, allowing for creation, retrieval,
+    updating, and deletion of book records. It supports tracking book details like
+    title, author, ISBN, publication year, genre, and copy availability.
+servers:
+- url: https://api.book-management.com/v1
+  description: Production server
+- url: http://localhost:8080/v1
+  description: Local development server
+tags:
+- name: Books
+  description: Operations related to books
+security:
+- bearerAuth: []
+paths:
+  /books:
+    post:
+      operationId: createBook
+      summary: Create a new book record
+      description: Adds a new book entry to the management system. The 'availableCopies'
+        field will be automatically initialized to 'totalCopies' upon creation. The
+        'isbn' must be unique.
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      requestBody:
+        description: Book data to create a new book record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCreate'
+      responses:
+        '201':
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid request payload or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity (e.g., unique ISBN violation, invalid
+            publication year)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters: []
+    get:
+      operationId: listBooks
+      summary: Retrieve a list of all books
+      description: Returns a collection of all books currently stored in the system.
+        Supports optional pagination parameters.
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: limit
+        in: query
+        description: Maximum number of books to return
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 100
+      - name: offset
+        in: query
+        description: Number of books to skip before starting to collect the result
+          set
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      responses:
+        '200':
+          description: A paginated list of books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookListResponse'
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /books/{book_id}:
+    parameters:
+    - name: book_id
+      in: path
+      description: The unique identifier of the book
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: getBookById
+      summary: Retrieve a single book by ID
+      description: Returns the detailed information for a specific book identified
+        by its unique ID.
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Book details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        description: Unique identifier for book_id
+        schema:
+          type: string
+    put:
+      operationId: updateBook
+      summary: Update an existing book's details (full replacement)
+      description: 'Replaces all updatable fields of an existing book with the provided
+        data. All fields (excluding ''id'') must be provided in the request body.
+        Note: ''isbn'' must remain unique or be updated to a new unique value. ''availableCopies''
+        cannot exceed ''totalCopies''.'
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      requestBody:
+        description: Full book data to update an existing record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookUpdate'
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid request payload or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity (e.g., unique ISBN violation, invalid
+            publication year, availableCopies > totalCopies)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        description: Unique identifier for book_id
+        schema:
+          type: string
+    patch:
+      operationId: partiallyUpdateBook
+      summary: Partially update an existing book's details
+      description: 'Updates specific fields of an existing book without requiring
+        all fields. Only the fields provided in the request body will be modified.
+        Note: ''isbn'' must remain unique or be updated to a new unique value. ''availableCopies''
+        cannot exceed ''totalCopies''.'
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      requestBody:
+        description: Partial book data to update an existing record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookPartialUpdate'
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid request payload or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity (e.g., unique ISBN violation, invalid
+            publication year, availableCopies > totalCopies)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        description: Unique identifier for book_id
+        schema:
+          type: string
+    delete:
+      operationId: deleteBook
+      summary: Delete a book record
+      description: Removes a book entry from the management system permanently.
+      tags:
+      - Books
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Resource deleted successfully
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        description: Unique identifier for book_id
+        schema:
+          type: string
+components:
+  schemas:
+    Book:
+      title: Book
+      description: Represents a single book in the management system, including its
+        descriptive metadata and availability.
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the book.
+          readOnly: true
+          example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+        title:
+          type: string
+          description: The title of the book.
+          example: The Hitchhiker's Guide to the Galaxy
+        author:
+          type: string
+          description: The author of the book.
+          example: Douglas Adams
+        isbn:
+          type: string
+          description: The International Standard Book Number (unique identifier for
+            the book).
+          example: 978-0345391803
+        publicationYear:
+          type: integer
+          format: int32
+          description: The year the book was published. Must not be in the future.
+          minimum: 0
+          maximum: 2024
+          example: 1979
+        genre:
+          type: string
+          description: The genre of the book.
+          example: Science Fiction
+        availableCopies:
+          type: integer
+          description: The number of copies currently available. Cannot exceed totalCopies.
+          minimum: 0
+          example: 3
+        totalCopies:
+          type: integer
+          description: The total number of copies of this book owned by the system.
+            Must be non-negative.
+          minimum: 0
+          example: 5
+      required:
+      - id
+      - title
+      - author
+      - isbn
+      - publicationYear
+      - genre
+      - availableCopies
+      - totalCopies
+      example:
+        id: a1b2c3d4-e5f6-7890-1234-567890abcdef
+        title: The Hitchhiker's Guide to the Galaxy
+        author: Douglas Adams
+        isbn: 978-0345391803
+        publicationYear: 1979
+        genre: Science Fiction
+        availableCopies: 3
+        totalCopies: 5
+    BookCreate:
+      title: BookCreate
+      description: Data required to create a new book record.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the book.
+          example: The Lord of the Rings
+        author:
+          type: string
+          description: The author of the book.
+          example: J.R.R. Tolkien
+        isbn:
+          type: string
+          description: The International Standard Book Number (must be unique).
+          example: 978-0618053267
+        publicationYear:
+          type: integer
+          format: int32
+          description: The year the book was published. Must not be in the future.
+          minimum: 0
+          maximum: 2024
+          example: 1954
+        genre:
+          type: string
+          description: The genre of the book.
+          example: Fantasy
+        totalCopies:
+          type: integer
+          description: The total number of copies of this book to add. 'availableCopies'
+            will be initialized to this value.
+          minimum: 0
+          example: 10
+      required:
+      - title
+      - author
+      - isbn
+      - publicationYear
+      - genre
+      - totalCopies
+      example:
+        title: The Lord of the Rings
+        author: J.R.R. Tolkien
+        isbn: 978-0618053267
+        publicationYear: 1954
+        genre: Fantasy
+        totalCopies: 10
+    BookUpdate:
+      title: BookUpdate
+      description: Full data to update an existing book record. All fields are required
+        for a PUT operation.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the book.
+          example: 'The Lord of the Rings: Fellowship of the Ring'
+        author:
+          type: string
+          description: The author of the book.
+          example: J.R.R. Tolkien
+        isbn:
+          type: string
+          description: The International Standard Book Number (must be unique).
+          example: 978-0618053267
+        publicationYear:
+          type: integer
+          format: int32
+          description: The year the book was published. Must not be in the future.
+          minimum: 0
+          maximum: 2024
+          example: 1954
+        genre:
+          type: string
+          description: The genre of the book.
+          example: Fantasy
+        availableCopies:
+          type: integer
+          description: The number of copies currently available. Cannot exceed totalCopies.
+          minimum: 0
+          example: 8
+        totalCopies:
+          type: integer
+          description: The total number of copies of this book owned by the system.
+            Must be non-negative.
+          minimum: 0
+          example: 10
+      required:
+      - title
+      - author
+      - isbn
+      - publicationYear
+      - genre
+      - availableCopies
+      - totalCopies
+      example:
+        title: 'The Lord of the Rings: Fellowship of the Ring'
+        author: J.R.R. Tolkien
+        isbn: 978-0618053267
+        publicationYear: 1954
+        genre: Fantasy
+        availableCopies: 8
+        totalCopies: 10
+    BookPartialUpdate:
+      title: BookPartialUpdate
+      description: Partial data to update an existing book record. Fields not provided
+        will remain unchanged. All fields are optional.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the book.
+          example: The Hobbit
+        author:
+          type: string
+          description: The author of the book.
+          example: J.R.R. Tolkien
+        isbn:
+          type: string
+          description: The International Standard Book Number (must be unique if updated).
+          example: 978-0345339683
+        publicationYear:
+          type: integer
+          format: int32
+          description: The year the book was published. Must not be in the future.
+          minimum: 0
+          maximum: 2024
+          example: 1937
+        genre:
+          type: string
+          description: The genre of the book.
+          example: Fantasy
+        availableCopies:
+          type: integer
+          description: The number of copies currently available. Cannot exceed totalCopies.
+          minimum: 0
+          example: 5
+        totalCopies:
+          type: integer
+          description: The total number of copies of this book owned by the system.
+            Must be non-negative.
+          minimum: 0
+          example: 7
+      example:
+        title: The Hobbit
+        author: J.R.R. Tolkien
+        isbn: 978-0345339683
+        publicationYear: 1937
+        genre: Fantasy
+        availableCopies: 5
+        totalCopies: 7
+    BookListResponse:
+      title: BookListResponse
+      description: A paginated list of books.
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+          description: Array of book objects.
+          example: []
+        total:
+          type: integer
+          description: Total number of books matching the criteria.
+          minimum: 0
+          example: 42
+        limit:
+          type: integer
+          description: The maximum number of items requested.
+          minimum: 1
+          example: 10
+        offset:
+          type: integer
+          description: The number of items skipped before starting the results.
+          minimum: 0
+          example: 0
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      example:
+        items: []
+        total: 42
+        limit: 10
+        offset: 0
+    MessageResponse:
+      title: MessageResponse
+      description: A generic response for operations that do not return specific data.
+      type: object
+      properties:
+        message:
+          type: string
+          description: A descriptive message about the outcome of the operation.
+          example: Operation completed successfully.
+      required:
+      - message
+      example:
+        message: Operation completed successfully.
+    ErrorResponse:
+      title: ErrorResponse
+      description: Standard error response format.
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code applicable to this error.
+          example: 400
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type.
+          example: Bad Request
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of
+            the problem.
+          example: The provided ISBN is already in use.
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of
+            the problem. It may or may not yield further information if dereferenced.
+          example: /books
+      required:
+      - status
+      - title
+      - detail
+      example:
+        status: 400
+        title: Bad Request
+        detail: The provided ISBN is already in use.
+        instance: /books
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'JWT Authorization header using the Bearer scheme. Example: ''Authorization:
+        Bearer {token}'''

@@ -1,0 +1,38 @@
+[
+  {
+    "rule_id": "SEC-101 | BIZ-001",
+    "category": "security",
+    "severity": "warning",
+    "path": "paths./books.post",
+    "message": "The `POST /books` endpoint, which creates a new book record, is secured only by `bearerAuth` (authentication). Creating new resources is often a privileged operation that should be restricted to users with specific roles (e.g., 'admin', 'librarian') rather than any authenticated user.",
+    "recommendation": "Implement granular, role-based authorization checks for the `createBook` operation. This could involve defining specific security scopes in the OpenAPI specification (e.g., `bearerAuth: [ 'books:write' ]`) and ensuring the backend enforces these role-based permissions.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "BIZ-001 | SEM-001 | SCHEMA-001",
+    "category": "business_logic",
+    "severity": "warning",
+    "path": "paths./books.post.description",
+    "message": "The description for `POST /books` states that `availableCopies` will be automatically initialized to `totalCopies` upon creation. This implies `availableCopies` should either not be included in the `BookCreate` schema, or if it is, any provided value must be ignored or explicitly validated. The absence of `BookCreate` and `Book` schema definitions prevents full verification of this business rule's consistency within the API's input/output contracts.",
+    "recommendation": "Explicitly define the `BookCreate` and `Book` schemas. Ensure `BookCreate` does not include `availableCopies` if it's an automatically derived field, or clearly document its behavior if present. The `Book` schema should include both `totalCopies` and `availableCopies`.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEC-002 | SCHEMA-001",
+    "category": "security",
+    "severity": "warning",
+    "path": "components.schemas.ErrorResponse",
+    "message": "The `ErrorResponse` schema is referenced for various error codes (400, 401, 404, 422) but its definition is missing. Without a clear schema, it's impossible to ensure that error responses do not inadvertently disclose sensitive internal information (e.g., stack traces, internal system details, database errors).",
+    "recommendation": "Define the `ErrorResponse` schema in `components/schemas`. It should be generic and avoid exposing implementation details. Typically, it includes fields like `code`, `message`, and optionally `details` (an array of specific error causes).",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "REST-001 | SCHEMA-001",
+    "category": "rest_compliance",
+    "severity": "info",
+    "path": "paths./books/{book_id}",
+    "message": "The OpenAPI specification provided is incomplete, specifically missing definitions for `PUT /books/{book_id}` and `DELETE /books/{book_id}`. Therefore, an audit of idempotency guarantees for these critical REST methods cannot be performed.",
+    "recommendation": "Complete the OpenAPI specification by defining all CRUD operations for the `/books/{book_id}` resource. Ensure `PUT` operations are fully idempotent (multiple identical requests have the same effect as a single request) and `DELETE` operations are also idempotent (deleting an already deleted resource should result in no further change, typically returning a 204 or 404).",
+    "suggested_patch": null
+  }
+]
