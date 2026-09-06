@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Book Management API - Swagger Documentation</title>
+  <title>E-Commerce Product and Order Management API - Swagger Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
   <style>
     body { margin: 0; padding: 0; background: #fafafa; }
@@ -19,198 +19,188 @@
         spec: {
   "openapi": "3.1.0",
   "info": {
-    "title": "Book Management API",
+    "title": "E-Commerce Product and Order Management API",
     "version": "1.0.0",
-    "description": "API for managing a collection of books, allowing for creation, retrieval, updating, and deletion of book records. It supports tracking book details like title, author, ISBN, publication year, genre, and copy availability."
+    "description": "API for managing products available for sale and customer orders within an e-commerce system. It supports product catalog management, including creation, retrieval, update, and deletion of products, as well as the full lifecycle of customer orders, from creation to status updates and cancellation."
   },
   "servers": [
     {
-      "url": "https://api.book-management.com/v1",
-      "description": "Production server"
-    },
-    {
-      "url": "http://localhost:8080/v1",
-      "description": "Local development server"
-    }
-  ],
-  "tags": [
-    {
-      "name": "Books",
-      "description": "Operations related to books"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "http://localhost:8000",
+      "description": "Local Development Server"
     }
   ],
   "paths": {
-    "/books": {
-      "post": {
-        "operationId": "createBook",
-        "summary": "Create a new book record",
-        "description": "Adds a new book entry to the management system. The 'availableCopies' field will be automatically initialized to 'totalCopies' upon creation. The 'isbn' must be unique.",
+    "/products": {
+      "get": {
+        "operationId": "get_products",
+        "summary": "Retrieve a list of all products",
+        "description": "Returns a paginated list of all available products in the catalog. Supports filtering and sorting.",
         "tags": [
-          "Books"
+          "Products"
         ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of records to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of records to skip for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_products",
+        "summary": "Create a new product",
+        "description": "Adds a new product to the catalog. Requires product details such as name, description, price, and initial stock quantity. Only authorized users can perform this action.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearerAuth": []
           }
         ],
         "requestBody": {
-          "description": "Book data to create a new book record",
           "required": true,
+          "description": "Payload data",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BookCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Book created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Book"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request payload or data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity (e.g., unique ISBN violation, invalid publication year)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": []
-      },
-      "get": {
-        "operationId": "listBooks",
-        "summary": "Retrieve a list of all books",
-        "description": "Returns a collection of all books currently stored in the system. Supports optional pagination parameters.",
-        "tags": [
-          "Books"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of books to return",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 100
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "description": "Number of books to skip before starting to collect the result set",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A paginated list of books",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookListResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
+                "$ref": "#/components/schemas/ProductCreate"
               }
             }
           }
         }
       }
     },
-    "/books/{book_id}": {
-      "parameters": [
-        {
-          "name": "book_id",
-          "in": "path",
-          "description": "The unique identifier of the book",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
+    "/products/{id}": {
       "get": {
-        "operationId": "getBookById",
-        "summary": "Retrieve a single book by ID",
-        "description": "Returns the detailed information for a specific book identified by its unique ID.",
+        "operationId": "get_products_id",
+        "summary": "Retrieve a single product by ID",
+        "description": "Returns the details of a specific product identified by its unique ID.",
         "tags": [
-          "Books"
+          "Products"
         ],
-        "security": [
+        "parameters": [
           {
-            "bearerAuth": []
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Book details retrieved successfully",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Book"
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           },
           "401": {
-            "description": "Authentication required or invalid credentials",
+            "description": "Unauthorized / Missing Token",
             "content": {
               "application/json": {
                 "schema": {
@@ -220,7 +210,7 @@
             }
           },
           "404": {
-            "description": "Book not found",
+            "description": "Resource Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -230,54 +220,43 @@
             }
           }
         },
-        "parameters": [
+        "security": [
           {
-            "name": "book_id",
-            "in": "path",
-            "required": true,
-            "description": "Unique identifier for book_id",
-            "schema": {
-              "type": "string"
-            }
+            "bearerAuth": []
           }
         ]
       },
       "put": {
-        "operationId": "updateBook",
-        "summary": "Update an existing book's details (full replacement)",
-        "description": "Replaces all updatable fields of an existing book with the provided data. All fields (excluding 'id') must be provided in the request body. Note: 'isbn' must remain unique or be updated to a new unique value. 'availableCopies' cannot exceed 'totalCopies'.",
+        "operationId": "put_products_id",
+        "summary": "Update an existing product",
+        "description": "Updates all details of an existing product identified by its ID. All fields in the request body are required for a full replacement. Only authorized users can perform this action.",
         "tags": [
-          "Books"
+          "Products"
         ],
-        "security": [
+        "parameters": [
           {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "description": "Full book data to update an existing record",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookUpdate"
-              }
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Book updated successfully",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Book"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request payload or data",
+            "description": "Bad Request / Validation Failure",
             "content": {
               "application/json": {
                 "schema": {
@@ -287,7 +266,7 @@
             }
           },
           "401": {
-            "description": "Authentication required or invalid credentials",
+            "description": "Unauthorized / Missing Token",
             "content": {
               "application/json": {
                 "schema": {
@@ -297,17 +276,7 @@
             }
           },
           "404": {
-            "description": "Book not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity (e.g., unique ISBN violation, invalid publication year, availableCopies > totalCopies)",
+            "description": "Resource Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -317,54 +286,54 @@
             }
           }
         },
-        "parameters": [
+        "security": [
           {
-            "name": "book_id",
-            "in": "path",
-            "required": true,
-            "description": "Unique identifier for book_id",
-            "schema": {
-              "type": "string"
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdate"
+              }
             }
           }
-        ]
+        }
       },
       "patch": {
-        "operationId": "partiallyUpdateBook",
-        "summary": "Partially update an existing book's details",
-        "description": "Updates specific fields of an existing book without requiring all fields. Only the fields provided in the request body will be modified. Note: 'isbn' must remain unique or be updated to a new unique value. 'availableCopies' cannot exceed 'totalCopies'.",
+        "operationId": "patch_products_id",
+        "summary": "Partially update an existing product",
+        "description": "Updates specific fields of an existing product identified by its ID. Only the fields provided in the request body will be updated. Only authorized users can perform this action.",
         "tags": [
-          "Books"
+          "Products"
         ],
-        "security": [
+        "parameters": [
           {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "description": "Partial book data to update an existing record",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookPartialUpdate"
-              }
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Book updated successfully",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Book"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request payload or data",
+            "description": "Bad Request / Validation Failure",
             "content": {
               "application/json": {
                 "schema": {
@@ -374,7 +343,7 @@
             }
           },
           "401": {
-            "description": "Authentication required or invalid credentials",
+            "description": "Unauthorized / Missing Token",
             "content": {
               "application/json": {
                 "schema": {
@@ -384,17 +353,7 @@
             }
           },
           "404": {
-            "description": "Book not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity (e.g., unique ISBN violation, invalid publication year, availableCopies > totalCopies)",
+            "description": "Resource Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -404,36 +363,57 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "book_id",
-            "in": "path",
-            "required": true,
-            "description": "Unique identifier for book_id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteBook",
-        "summary": "Delete a book record",
-        "description": "Removes a book entry from the management system permanently.",
-        "tags": [
-          "Books"
-        ],
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdate"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_products_id",
+        "summary": "Delete a product",
+        "description": "Removes a product from the catalog. This operation might be restricted if the product is part of existing orders. Only authorized users can perform this action.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
             "description": "Resource deleted successfully"
           },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Authentication required or invalid credentials",
+            "description": "Unauthorized / Missing Token",
             "content": {
               "application/json": {
                 "schema": {
@@ -443,7 +423,7 @@
             }
           },
           "404": {
-            "description": "Book not found",
+            "description": "Resource Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -453,15 +433,342 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/orders": {
+      "get": {
+        "operationId": "get_orders",
+        "summary": "Retrieve a list of all orders",
+        "description": "Returns a paginated list of all customer orders. Can be filtered by customer ID or status. Only authorized users (e.g., admins) can view all orders; customers can only view their own.",
+        "tags": [
+          "Orders"
+        ],
         "parameters": [
           {
-            "name": "book_id",
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of records to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of records to skip for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_orders",
+        "summary": "Create a new order",
+        "description": "Creates a new customer order with specified products and quantities. This operation validates product availability, decrements stock quantities, and calculates the total amount.",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "operationId": "get_orders_id",
+        "summary": "Retrieve a single order by ID",
+        "description": "Returns the details of a specific order, including its line items. Access is restricted to the order's customer or authorized personnel.",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
             "in": "path",
             "required": true,
-            "description": "Unique identifier for book_id",
+            "description": "Unique identifier for id",
             "schema": {
               "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patch_orders_id",
+        "summary": "Update an order's status",
+        "description": "Allows updating the status of an existing order (e.g., from 'pending' to 'shipped' or 'delivered'). This operation might trigger further business logic like stock replenishment if cancelled. Only authorized users can perform this action.",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderStatusUpdate"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_orders_id",
+        "summary": "Cancel an order",
+        "description": "Marks an order as 'cancelled'. This operation should trigger stock replenishment for the items in the order, provided the order has not been shipped or delivered. Only authorized users or the customer (within a certain timeframe) can perform this action.",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
           }
         ]
       }
@@ -469,359 +776,549 @@
   },
   "components": {
     "schemas": {
-      "Book": {
-        "title": "Book",
-        "description": "Represents a single book in the management system, including its descriptive metadata and availability.",
+      "ErrorResponse": {
         "type": "object",
+        "required": [
+          "detail",
+          "status"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Human-readable error description",
+            "example": "sample_detail"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 101
+          },
+          "code": {
+            "type": "string",
+            "description": "Error classification code",
+            "example": "sample_code"
+          }
+        },
+        "example": {
+          "detail": "sample_detail",
+          "status": 101,
+          "code": "sample_code"
+        }
+      },
+      "Product": {
+        "type": "object",
+        "description": "Represents an item available for sale in the e-commerce catalog.",
+        "required": [
+          "id",
+          "name"
+        ],
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier for the book.",
-            "readOnly": true,
-            "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            "example": "123e4567-e89b-12d3-a456-426614174000"
           },
-          "title": {
+          "name": {
             "type": "string",
-            "description": "The title of the book.",
-            "example": "The Hitchhiker's Guide to the Galaxy"
+            "example": "Sample name"
           },
-          "author": {
+          "description": {
             "type": "string",
-            "description": "The author of the book.",
-            "example": "Douglas Adams"
+            "example": "Sample description"
           },
-          "isbn": {
+          "price": {
             "type": "string",
-            "description": "The International Standard Book Number (unique identifier for the book).",
-            "example": "978-0345391803"
+            "example": "Sample price"
           },
-          "publicationYear": {
+          "stockQuantity": {
             "type": "integer",
-            "format": "int32",
-            "description": "The year the book was published. Must not be in the future.",
-            "minimum": 0,
-            "maximum": 2024,
-            "example": 1979
+            "example": 1
           },
-          "genre": {
+          "createdAt": {
             "type": "string",
-            "description": "The genre of the book.",
-            "example": "Science Fiction"
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           },
-          "availableCopies": {
-            "type": "integer",
-            "description": "The number of copies currently available. Cannot exceed totalCopies.",
-            "minimum": 0,
-            "example": 3
-          },
-          "totalCopies": {
-            "type": "integer",
-            "description": "The total number of copies of this book owned by the system. Must be non-negative.",
-            "minimum": 0,
-            "example": 5
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           }
         },
+        "example": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "name": "Sample name",
+          "description": "Sample description",
+          "price": "Sample price",
+          "stockQuantity": 1,
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "ProductCreate": {
+        "type": "object",
+        "description": "Payload for creating a new Product",
         "required": [
-          "id",
-          "title",
-          "author",
-          "isbn",
-          "publicationYear",
-          "genre",
-          "availableCopies",
-          "totalCopies"
+          "name"
         ],
-        "example": {
-          "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-          "title": "The Hitchhiker's Guide to the Galaxy",
-          "author": "Douglas Adams",
-          "isbn": "978-0345391803",
-          "publicationYear": 1979,
-          "genre": "Science Fiction",
-          "availableCopies": 3,
-          "totalCopies": 5
-        }
-      },
-      "BookCreate": {
-        "title": "BookCreate",
-        "description": "Data required to create a new book record.",
-        "type": "object",
         "properties": {
-          "title": {
+          "name": {
             "type": "string",
-            "description": "The title of the book.",
-            "example": "The Lord of the Rings"
+            "example": "Sample name"
           },
-          "author": {
+          "description": {
             "type": "string",
-            "description": "The author of the book.",
-            "example": "J.R.R. Tolkien"
+            "example": "Sample description"
           },
-          "isbn": {
+          "price": {
             "type": "string",
-            "description": "The International Standard Book Number (must be unique).",
-            "example": "978-0618053267"
+            "example": "Sample price"
           },
-          "publicationYear": {
+          "stockQuantity": {
             "type": "integer",
-            "format": "int32",
-            "description": "The year the book was published. Must not be in the future.",
-            "minimum": 0,
-            "maximum": 2024,
-            "example": 1954
+            "example": 1
           },
-          "genre": {
+          "createdAt": {
             "type": "string",
-            "description": "The genre of the book.",
-            "example": "Fantasy"
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           },
-          "totalCopies": {
-            "type": "integer",
-            "description": "The total number of copies of this book to add. 'availableCopies' will be initialized to this value.",
-            "minimum": 0,
-            "example": 10
-          }
-        },
-        "required": [
-          "title",
-          "author",
-          "isbn",
-          "publicationYear",
-          "genre",
-          "totalCopies"
-        ],
-        "example": {
-          "title": "The Lord of the Rings",
-          "author": "J.R.R. Tolkien",
-          "isbn": "978-0618053267",
-          "publicationYear": 1954,
-          "genre": "Fantasy",
-          "totalCopies": 10
-        }
-      },
-      "BookUpdate": {
-        "title": "BookUpdate",
-        "description": "Full data to update an existing book record. All fields are required for a PUT operation.",
-        "type": "object",
-        "properties": {
-          "title": {
+          "updatedAt": {
             "type": "string",
-            "description": "The title of the book.",
-            "example": "The Lord of the Rings: Fellowship of the Ring"
-          },
-          "author": {
-            "type": "string",
-            "description": "The author of the book.",
-            "example": "J.R.R. Tolkien"
-          },
-          "isbn": {
-            "type": "string",
-            "description": "The International Standard Book Number (must be unique).",
-            "example": "978-0618053267"
-          },
-          "publicationYear": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The year the book was published. Must not be in the future.",
-            "minimum": 0,
-            "maximum": 2024,
-            "example": 1954
-          },
-          "genre": {
-            "type": "string",
-            "description": "The genre of the book.",
-            "example": "Fantasy"
-          },
-          "availableCopies": {
-            "type": "integer",
-            "description": "The number of copies currently available. Cannot exceed totalCopies.",
-            "minimum": 0,
-            "example": 8
-          },
-          "totalCopies": {
-            "type": "integer",
-            "description": "The total number of copies of this book owned by the system. Must be non-negative.",
-            "minimum": 0,
-            "example": 10
-          }
-        },
-        "required": [
-          "title",
-          "author",
-          "isbn",
-          "publicationYear",
-          "genre",
-          "availableCopies",
-          "totalCopies"
-        ],
-        "example": {
-          "title": "The Lord of the Rings: Fellowship of the Ring",
-          "author": "J.R.R. Tolkien",
-          "isbn": "978-0618053267",
-          "publicationYear": 1954,
-          "genre": "Fantasy",
-          "availableCopies": 8,
-          "totalCopies": 10
-        }
-      },
-      "BookPartialUpdate": {
-        "title": "BookPartialUpdate",
-        "description": "Partial data to update an existing book record. Fields not provided will remain unchanged. All fields are optional.",
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "The title of the book.",
-            "example": "The Hobbit"
-          },
-          "author": {
-            "type": "string",
-            "description": "The author of the book.",
-            "example": "J.R.R. Tolkien"
-          },
-          "isbn": {
-            "type": "string",
-            "description": "The International Standard Book Number (must be unique if updated).",
-            "example": "978-0345339683"
-          },
-          "publicationYear": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The year the book was published. Must not be in the future.",
-            "minimum": 0,
-            "maximum": 2024,
-            "example": 1937
-          },
-          "genre": {
-            "type": "string",
-            "description": "The genre of the book.",
-            "example": "Fantasy"
-          },
-          "availableCopies": {
-            "type": "integer",
-            "description": "The number of copies currently available. Cannot exceed totalCopies.",
-            "minimum": 0,
-            "example": 5
-          },
-          "totalCopies": {
-            "type": "integer",
-            "description": "The total number of copies of this book owned by the system. Must be non-negative.",
-            "minimum": 0,
-            "example": 7
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           }
         },
         "example": {
-          "title": "The Hobbit",
-          "author": "J.R.R. Tolkien",
-          "isbn": "978-0345339683",
-          "publicationYear": 1937,
-          "genre": "Fantasy",
-          "availableCopies": 5,
-          "totalCopies": 7
+          "name": "Sample name",
+          "description": "Sample description",
+          "price": "Sample price",
+          "stockQuantity": 1,
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
         }
       },
-      "BookListResponse": {
-        "title": "BookListResponse",
-        "description": "A paginated list of books.",
+      "ProductUpdate": {
         "type": "object",
+        "description": "Payload for updating an existing Product",
         "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Book"
-            },
-            "description": "Array of book objects.",
-            "example": []
+          "name": {
+            "type": "string",
+            "example": "Sample name"
           },
-          "total": {
-            "type": "integer",
-            "description": "Total number of books matching the criteria.",
-            "minimum": 0,
-            "example": 42
+          "description": {
+            "type": "string",
+            "example": "Sample description"
           },
-          "limit": {
-            "type": "integer",
-            "description": "The maximum number of items requested.",
-            "minimum": 1,
-            "example": 10
+          "price": {
+            "type": "string",
+            "example": "Sample price"
           },
-          "offset": {
+          "stockQuantity": {
             "type": "integer",
-            "description": "The number of items skipped before starting the results.",
-            "minimum": 0,
-            "example": 0
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           }
         },
+        "example": {
+          "name": "Sample name",
+          "description": "Sample description",
+          "price": "Sample price",
+          "stockQuantity": 1,
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "description": "Paginated list of Product records",
         "required": [
           "items",
           "total",
           "limit",
           "offset"
         ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "example": 100
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          }
+        },
         "example": {
           "items": [],
-          "total": 42,
-          "limit": 10,
+          "total": 100,
+          "limit": 20,
           "offset": 0
         }
       },
-      "MessageResponse": {
-        "title": "MessageResponse",
-        "description": "A generic response for operations that do not return specific data.",
+      "Order": {
         "type": "object",
+        "description": "Represents a customer's purchase, containing one or more order items.",
+        "required": [
+          "id"
+        ],
         "properties": {
-          "message": {
+          "id": {
             "type": "string",
-            "description": "A descriptive message about the outcome of the operation.",
-            "example": "Operation completed successfully."
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "Sample status"
+          },
+          "totalAmount": {
+            "type": "string",
+            "example": "Sample totalAmount"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           }
         },
-        "required": [
-          "message"
-        ],
         "example": {
-          "message": "Operation completed successfully."
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "customerId": "123e4567-e89b-12d3-a456-426614174000",
+          "orderDate": "2026-01-01T12:00:00Z",
+          "status": "Sample status",
+          "totalAmount": "Sample totalAmount",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
         }
       },
-      "ErrorResponse": {
-        "title": "ErrorResponse",
-        "description": "Standard error response format.",
+      "OrderCreate": {
         "type": "object",
+        "description": "Payload for creating a new Order",
+        "required": [],
         "properties": {
+          "customerId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
           "status": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The HTTP status code applicable to this error.",
-            "example": 400
-          },
-          "title": {
             "type": "string",
-            "description": "A short, human-readable summary of the problem type.",
-            "example": "Bad Request"
+            "example": "Sample status"
           },
-          "detail": {
+          "totalAmount": {
             "type": "string",
-            "description": "A human-readable explanation specific to this occurrence of the problem.",
-            "example": "The provided ISBN is already in use."
+            "example": "Sample totalAmount"
           },
-          "instance": {
+          "createdAt": {
             "type": "string",
-            "format": "uri",
-            "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.",
-            "example": "/books"
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
           }
         },
-        "required": [
-          "status",
-          "title",
-          "detail"
-        ],
         "example": {
-          "status": 400,
-          "title": "Bad Request",
-          "detail": "The provided ISBN is already in use.",
-          "instance": "/books"
+          "customerId": "123e4567-e89b-12d3-a456-426614174000",
+          "orderDate": "2026-01-01T12:00:00Z",
+          "status": "Sample status",
+          "totalAmount": "Sample totalAmount",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "OrderUpdate": {
+        "type": "object",
+        "description": "Payload for updating an existing Order",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "Sample status"
+          },
+          "totalAmount": {
+            "type": "string",
+            "example": "Sample totalAmount"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          }
+        },
+        "example": {
+          "customerId": "123e4567-e89b-12d3-a456-426614174000",
+          "orderDate": "2026-01-01T12:00:00Z",
+          "status": "Sample status",
+          "totalAmount": "Sample totalAmount",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "OrderListResponse": {
+        "type": "object",
+        "description": "Paginated list of Order records",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "example": 100
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          }
+        },
+        "example": {
+          "items": [],
+          "total": 100,
+          "limit": 20,
+          "offset": 0
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "description": "Represents a single line item within an order, linking to a product and specifying quantity and price at the time of order.",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 1
+          },
+          "priceAtOrder": {
+            "type": "string",
+            "example": "Sample priceAtOrder"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          }
+        },
+        "example": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "orderId": "123e4567-e89b-12d3-a456-426614174000",
+          "productId": "123e4567-e89b-12d3-a456-426614174000",
+          "quantity": 1,
+          "priceAtOrder": "Sample priceAtOrder",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "OrderItemCreate": {
+        "type": "object",
+        "description": "Payload for creating a new OrderItem",
+        "required": [],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 1
+          },
+          "priceAtOrder": {
+            "type": "string",
+            "example": "Sample priceAtOrder"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          }
+        },
+        "example": {
+          "orderId": "123e4567-e89b-12d3-a456-426614174000",
+          "productId": "123e4567-e89b-12d3-a456-426614174000",
+          "quantity": 1,
+          "priceAtOrder": "Sample priceAtOrder",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "OrderItemUpdate": {
+        "type": "object",
+        "description": "Payload for updating an existing OrderItem",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 1
+          },
+          "priceAtOrder": {
+            "type": "string",
+            "example": "Sample priceAtOrder"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          }
+        },
+        "example": {
+          "orderId": "123e4567-e89b-12d3-a456-426614174000",
+          "productId": "123e4567-e89b-12d3-a456-426614174000",
+          "quantity": 1,
+          "priceAtOrder": "Sample priceAtOrder",
+          "createdAt": "2026-01-01T12:00:00Z",
+          "updatedAt": "2026-01-01T12:00:00Z"
+        }
+      },
+      "OrderItemListResponse": {
+        "type": "object",
+        "description": "Paginated list of OrderItem records",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "example": 100
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          }
+        },
+        "example": {
+          "items": [],
+          "total": 100,
+          "limit": 20,
+          "offset": 0
         }
       }
     },
@@ -830,7 +1327,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
+        "description": "Enter JWT Bearer token"
       }
     }
   }

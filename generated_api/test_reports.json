@@ -1,0 +1,166 @@
+[
+  {
+    "total_tests": 5,
+    "passed": 4,
+    "failed": 1,
+    "errors": 0,
+    "duration_sec": 3.367,
+    "success": false,
+    "logs": "[PASS] test_health_check (0.013s)\n[PASS] test_orders_auth_required (0.017s)\n[FAIL] test_orders_crud_lifecycle: AssertionError()\n[PASS] test_products_auth_required (0.013s)\n[PASS] test_products_crud_lifecycle (0.036s)",
+    "items": [
+      {
+        "test_name": "test_health_check",
+        "status": "PASSED",
+        "duration_sec": 0.0133,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0172,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_crud_lifecycle",
+        "status": "FAILED",
+        "duration_sec": 0.0435,
+        "error_message": "AssertionError()"
+      },
+      {
+        "test_name": "test_products_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0125,
+        "error_message": null
+      },
+      {
+        "test_name": "test_products_crud_lifecycle",
+        "status": "PASSED",
+        "duration_sec": 0.0358,
+        "error_message": null
+      }
+    ]
+  },
+  {
+    "total_tests": 5,
+    "passed": 4,
+    "failed": 1,
+    "errors": 0,
+    "duration_sec": 2.982,
+    "success": false,
+    "logs": "[PASS] test_health_check (0.009s)\n[PASS] test_orders_auth_required (0.006s)\n[FAIL] test_orders_crud_lifecycle: AssertionError()\n[PASS] test_products_auth_required (0.007s)\n[PASS] test_products_crud_lifecycle (0.038s)",
+    "items": [
+      {
+        "test_name": "test_health_check",
+        "status": "PASSED",
+        "duration_sec": 0.009,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0058,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_crud_lifecycle",
+        "status": "FAILED",
+        "duration_sec": 0.017,
+        "error_message": "AssertionError()"
+      },
+      {
+        "test_name": "test_products_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0066,
+        "error_message": null
+      },
+      {
+        "test_name": "test_products_crud_lifecycle",
+        "status": "PASSED",
+        "duration_sec": 0.0383,
+        "error_message": null
+      }
+    ]
+  },
+  {
+    "total_tests": 5,
+    "passed": 4,
+    "failed": 1,
+    "errors": 0,
+    "duration_sec": 2.056,
+    "success": false,
+    "logs": "[PASS] test_health_check (0.013s)\n[PASS] test_orders_auth_required (0.006s)\n[FAIL] test_orders_crud_lifecycle: AssertionError()\n[PASS] test_products_auth_required (0.012s)\n[PASS] test_products_crud_lifecycle (0.035s)",
+    "items": [
+      {
+        "test_name": "test_health_check",
+        "status": "PASSED",
+        "duration_sec": 0.0128,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0056,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_crud_lifecycle",
+        "status": "FAILED",
+        "duration_sec": 0.0335,
+        "error_message": "AssertionError()"
+      },
+      {
+        "test_name": "test_products_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0117,
+        "error_message": null
+      },
+      {
+        "test_name": "test_products_crud_lifecycle",
+        "status": "PASSED",
+        "duration_sec": 0.0355,
+        "error_message": null
+      }
+    ]
+  },
+  {
+    "total_tests": 5,
+    "passed": 4,
+    "failed": 1,
+    "errors": 0,
+    "duration_sec": 3.53,
+    "success": false,
+    "logs": "[PASS] test_health_check (0.016s)\n[PASS] test_orders_auth_required (0.008s)\n[FAIL] test_orders_crud_lifecycle: AssertionError()\n[PASS] test_products_auth_required (0.01s)\n[PASS] test_products_crud_lifecycle (0.045s)",
+    "items": [
+      {
+        "test_name": "test_health_check",
+        "status": "PASSED",
+        "duration_sec": 0.0159,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0084,
+        "error_message": null
+      },
+      {
+        "test_name": "test_orders_crud_lifecycle",
+        "status": "FAILED",
+        "duration_sec": 0.0332,
+        "error_message": "AssertionError()"
+      },
+      {
+        "test_name": "test_products_auth_required",
+        "status": "PASSED",
+        "duration_sec": 0.0098,
+        "error_message": null
+      },
+      {
+        "test_name": "test_products_crud_lifecycle",
+        "status": "PASSED",
+        "duration_sec": 0.0454,
+        "error_message": null
+      }
+    ]
+  }
+]

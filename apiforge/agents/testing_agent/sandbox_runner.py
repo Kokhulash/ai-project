@@ -30,6 +30,8 @@ class SandboxRunner:
         report = TestExecutionReport()
         items: List[TestResultItem] = []
         logs: List[str] = []
+        
+        initial_modules = set(sys.modules.keys())
 
         with tempfile.TemporaryDirectory(prefix="apiforge_sandbox_") as temp_dir:
             # 1. Materialize all files
@@ -123,7 +125,7 @@ class SandboxRunner:
                 if temp_dir in sys.path:
                     sys.path.remove(temp_dir)
                 for mod_key in list(sys.modules.keys()):
-                    if mod_key.startswith("app") or mod_key.startswith("sandbox_"):
+                    if mod_key not in initial_modules:
                         del sys.modules[mod_key]
 
         total = len(items)

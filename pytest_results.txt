@@ -1,0 +1,63 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.1, pytest-9.1.1, pluggy-1.6.0 -- E:\GSivasarvesh\Third party softwares\Coding softwares\python.exe
+cachedir: .pytest_cache
+rootdir: E:\College\AI\ai-project
+configfile: pyproject.toml
+plugins: anyio-4.14.2, langsmith-0.10.2
+collecting ... collected 12 items
+
+tests/test_agents.py::test_agent_pipeline_phases PASSED                  [  8%]
+tests/test_e2e_pipeline.py::test_full_orchestrator_pipeline FAILED       [ 16%]
+tests/test_evaluation_metrics.py::test_evaluate_state_metrics_calculation PASSED [ 25%]
+tests/test_evaluation_metrics.py::test_benchmark_runner_smoke FAILED     [ 33%]
+tests/test_linter.py::test_linter_detects_verb_in_path PASSED            [ 41%]
+tests/test_linter.py::test_linter_detects_singular_resource PASSED       [ 50%]
+tests/test_linter.py::test_linter_detects_get_with_request_body PASSED   [ 58%]
+tests/test_linter.py::test_linter_detects_missing_404_on_parameter PASSED [ 66%]
+tests/test_linter.py::test_linter_detects_sensitive_query_param PASSED   [ 75%]
+tests/test_refiner.py::test_refiner_repairs_bad_spec PASSED              [ 83%]
+tests/test_scoring.py::test_calculate_quality_score_clean_spec PASSED    [ 91%]
+tests/test_scoring.py::test_calculate_quality_score_deductions PASSED    [100%]
+
+================================== FAILURES ===================================
+_______________________ test_full_orchestrator_pipeline _______________________
+
+    def test_full_orchestrator_pipeline():
+        with tempfile.TemporaryDirectory(prefix="apiforge_test_out_") as out_dir:
+            llm = MockLLMClient()
+            orchestrator = APIForgeOrchestrator(
+                llm=llm,
+                max_review_iterations=2,
+                max_debug_iterations=2,
+                pass_threshold=80.0,
+            )
+    
+            requirements = "Design a Task Tracking API with projects, tasks, and user authentication."
+            state = orchestrator.run(requirements, output_dir=out_dir)
+    
+            # 1. Verify Status and Spec
+>           assert state.status in ("completed", "approved")
+E           AssertionError: assert 'tested' in ('completed', 'approved')
+E            +  where 'tested' = APIForgeState(raw_requirements='Design a Task Tracking API with projects, tasks, and user authentication.', structured_requirements=StructuredRequirements(title='Task & Project Management API', version='1.0.0', description='API for managing projects, tasks, team assignments, and statuses.', auth_type='bearer', entities=[RequirementEntity(name='Project', description='A workspace containing tasks', fields={'id': 'string', 'name': 'string', 'description': 'string', 'created_at': 'string'}, relationships=['Task']), RequirementEntity(name='Task', description='An actionable work item within a project', fields={'id': 'string', 'project_id': 'string', 'title': 'string', 'status': 'string', 'assigned_to': 'string'}, relationships=['Project'])], endpoints=[RequirementEndpoint(path='/projects', method='POST', summary='Create a new project', description='Creates a project workspace', auth_required=True, request_schema='ProjectCreate', response_schema='ProjectResponse', expected_status_codes=[201, 400, 401]), RequirementEndpoint(path='/projects', method='GET', summary='List all projects', description='Retrieves paginated list of projects', auth_required=True, request_schema=None, response_sch...atorAgent', timestamp='2026-09-06T09:20:21.078159+00:00', action='Test suite generated', details={'files': ['tests/test_api_functional.py', 'tests/__init__.py']}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:21.078167+00:00', action='Running sandbox execution and automated tests', details={}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:21.730067+00:00', action='Test execution round completed', details={'total': 0, 'passed': 0, 'failed': 0, 'errors': 0, 'success': False}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:21.730097+00:00', action='Initiating debug repair loop iteration 1', details={}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:22.231577+00:00', action='Post-repair test execution: 0/0 passed', details={}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:22.231615+00:00', action='Initiating debug repair loop iteration 2', details={}), AgentTrace(agent_name='TestingAndDebuggingAgent', timestamp='2026-09-06T09:20:22.721577+00:00', action='Post-repair test execution: 0/0 passed', details={})], status='tested').status
+
+tests\test_e2e_pipeline.py:24: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  apiforge.agents.generator_agent:generator_agent.py:81 Spec generation via LLM encountered issue (LLM response did not contain valid OpenAPI structure.). Using deterministic OAS builder.
+_________________________ test_benchmark_runner_smoke _________________________
+
+    def test_benchmark_runner_smoke():
+        runner = BenchmarkRunner(llm=MockLLMClient())
+        # Run a single suite to verify end-to-end benchmark execution
+        results = runner.run_suite(["task_management"])
+        assert "task_management" in results["suites"]
+        tm_res = results["suites"]["task_management"]
+>       assert tm_res["tests_passed"] > 0
+E       assert 0 > 0
+
+tests\test_evaluation_metrics.py:55: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  apiforge.agents.generator_agent:generator_agent.py:81 Spec generation via LLM encountered issue (LLM response did not contain valid OpenAPI structure.). Using deterministic OAS builder.
+=========================== short test summary info ===========================
+FAILED tests/test_e2e_pipeline.py::test_full_orchestrator_pipeline - Assertio...
+FAILED tests/test_evaluation_metrics.py::test_benchmark_runner_smoke - assert...
+======================== 2 failed, 10 passed in 4.71s =========================
