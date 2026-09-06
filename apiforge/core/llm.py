@@ -8,6 +8,12 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type, TypeVar
 from pydantic import BaseModel
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 T = TypeVar("T", bound=BaseModel)
 
 

@@ -19,8 +19,8 @@ class RequirementEndpoint(BaseModel):
     summary: str
     description: str = ""
     auth_required: bool = False
-    request_schema: Optional[str] = None
-    response_schema: Optional[str] = None
+    request_schema: Optional[Any] = None
+    response_schema: Optional[Any] = None
     expected_status_codes: List[int] = Field(default_factory=lambda: [200])
 
 

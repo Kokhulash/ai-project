@@ -257,12 +257,17 @@ Business Rules:
                 operation["security"] = [{"bearerAuth": []}]
 
             if method in ("post", "put", "patch") and ep.request_schema:
+                body_schema = (
+                    {"$ref": f"#/components/schemas/{ep.request_schema}"}
+                    if isinstance(ep.request_schema, str)
+                    else ep.request_schema
+                )
                 operation["requestBody"] = {
                     "required": True,
                     "description": "Payload data",
                     "content": {
                         "application/json": {
-                            "schema": {"$ref": f"#/components/schemas/{ep.request_schema}"}
+                            "schema": body_schema
                         }
                     }
                 }
