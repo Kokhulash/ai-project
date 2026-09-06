@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Healthcare Clinical API - Swagger Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    body { margin: 0; padding: 0; background: #fafafa; }
+    .topbar { display: none; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        spec: {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Healthcare Clinical API",
+    "version": "1.0.0",
+    "description": "API for patient health records and clinical appointments."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/patients": {
+      "get": {
+        "operationId": "get_patients",
+        "summary": "List patients",
+        "description": "List patients",
+        "tags": [
+          "Patients"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of records to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of records to skip for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_patients",
+        "summary": "Register patient",
+        "description": "Register patient",
+        "tags": [
+          "Patients"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patients/{patient_id}": {
+      "get": {
+        "operationId": "get_patients_patient_id",
+        "summary": "Get patient",
+        "description": "Get patient",
+        "tags": [
+          "Patients"
+        ],
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for patient_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/appointments": {
+      "post": {
+        "operationId": "post_appointments",
+        "summary": "Schedule appointment",
+        "description": "Schedule appointment",
+        "tags": [
+          "Appointments"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payload data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appointments/{appointment_id}": {
+      "delete": {
+        "operationId": "delete_appointments_appointment_id",
+        "summary": "Cancel appointment",
+        "description": "Cancel appointment",
+        "tags": [
+          "Appointments"
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for appointment_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request / Validation Failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Missing Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "detail",
+          "status"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Human-readable error description",
+            "example": "sample_detail"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 101
+          },
+          "code": {
+            "type": "string",
+            "description": "Error classification code",
+            "example": "sample_code"
+          }
+        },
+        "example": {
+          "detail": "sample_detail",
+          "status": 101,
+          "code": "sample_code"
+        }
+      },
+      "Patient": {
+        "type": "object",
+        "description": "Patient record",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "full_name": {
+            "type": "string",
+            "example": "Sample full_name"
+          },
+          "birth_date": {
+            "type": "string",
+            "example": "Sample birth_date"
+          }
+        },
+        "example": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "full_name": "Sample full_name",
+          "birth_date": "Sample birth_date"
+        }
+      },
+      "PatientCreate": {
+        "type": "object",
+        "description": "Payload for creating a new Patient",
+        "required": [],
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "example": "Sample full_name"
+          },
+          "birth_date": {
+            "type": "string",
+            "example": "Sample birth_date"
+          }
+        },
+        "example": {
+          "full_name": "Sample full_name",
+          "birth_date": "Sample birth_date"
+        }
+      },
+      "PatientListResponse": {
+        "type": "object",
+        "description": "Paginated list of Patient records",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Patient"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "example": 100
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          }
+        },
+        "example": {
+          "items": [],
+          "total": 100,
+          "limit": 20,
+          "offset": 0
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "description": "Clinical appointment",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "patient_id": {
+            "type": "string",
+            "example": "Sample patient_id"
+          },
+          "appointment_time": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "Sample status"
+          }
+        },
+        "example": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "patient_id": "Sample patient_id",
+          "appointment_time": "2026-01-01T12:00:00Z",
+          "status": "Sample status"
+        }
+      },
+      "AppointmentCreate": {
+        "type": "object",
+        "description": "Payload for creating a new Appointment",
+        "required": [],
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "example": "Sample patient_id"
+          },
+          "appointment_time": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-01T12:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "Sample status"
+          }
+        },
+        "example": {
+          "patient_id": "Sample patient_id",
+          "appointment_time": "2026-01-01T12:00:00Z",
+          "status": "Sample status"
+        }
+      },
+      "AppointmentListResponse": {
+        "type": "object",
+        "description": "Paginated list of Appointment records",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Appointment"
+            },
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "example": 100
+          },
+          "limit": {
+            "type": "integer",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          }
+        },
+        "example": {
+          "items": [],
+          "total": 100,
+          "limit": 20,
+          "offset": 0
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT Bearer token"
+      }
+    }
+  }
+},
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIBundle.SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>
