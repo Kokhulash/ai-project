@@ -73,6 +73,27 @@ As defined in the project methodology, APIForge AI evaluates every generated API
 
 ---
 
+## 🔑 LLM Provider Configuration
+
+APIForge AI supports multiple LLM backends with automatic detection and seamless fallback:
+
+1. Create a `.env` file in the project root:
+   ```env
+   # Google Gemini (Default recommended live LLM)
+   GEMINI_API_KEY=your_gemini_api_key_here
+
+   # OR OpenAI (Alternative live LLM)
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
+
+2. **Provider Selection**:
+   * `auto` (default): Uses `GEMINI_API_KEY` if set, then `OPENAI_API_KEY`, otherwise falls back to `mock`.
+   * `gemini`: Uses Google Gemini (`gemini-2.5-flash`).
+   * `openai`: Uses OpenAI (`gpt-4o`).
+   * `mock`: Deterministic offline mock engine with preloaded domain presets (runs 100% offline with zero API cost).
+
+---
+
 ## 🚀 Quickstart
 
 ### 1. Installation
@@ -87,39 +108,50 @@ python -m venv .venv
 .venv\Scripts\activate   # On Windows
 source .venv/bin/activate # On Linux/macOS
 
-# Install package
+# Install dependencies in editable mode
 pip install -e .
 ```
 
 ### 2. End-to-End API Generation (CLI)
 
 ```bash
-# Generate full API service from natural language prompt
-apiforge run "Design an E-Commerce Order Management API with customer auth, cart, and product inventory." --output-dir ./generated_api
+# Run full pipeline with live Gemini model
+python -m apiforge.cli run "Design an E-Commerce Order Management API with customer auth, cart, and product inventory." --provider gemini --output-dir ./generated_api
+
+# Run offline with deterministic mock model
+python -m apiforge.cli run "Design a Task Tracking API." --provider mock --output-dir ./generated_api
 ```
 
 ### 3. Review Any Existing OpenAPI Specification
 
 ```bash
 # Audit an OpenAPI spec for REST smells and security vulnerabilities
-apiforge review ./generated_api/openapi.json
+python -m apiforge.cli review ./generated_api/openapi.json
 
-# Audit and automatically apply refiner fixes
-apiforge review ./flawed_spec.json --fix --output ./fixed_spec.json
+# Audit and automatically apply refiner fixes to any flawed spec
+python -m apiforge.cli review ./flawed_spec.json --fix --output ./fixed_spec.json
 ```
 
-### 4. Run Benchmark Evaluation
+### 4. Run Academic Benchmark Suite
 
 ```bash
 # Evaluate APIForge across 4 domain test suites (E-Commerce, Healthcare, IoT, Task Management)
-apiforge benchmark --suite all
+python -m apiforge.cli benchmark --suite all
 ```
 
 ### 5. Launch Interactive Web Dashboard
 
 ```bash
-apiforge ui --port 8501
+python -m apiforge.cli ui --port 8501
 ```
+
+Once launched, visit **http://localhost:8501** in your browser. The dashboard supports:
+* Generating APIs from natural language requirements with real-time agent progress.
+* Loading existing generated API folders (such as `./demo_healthcare_api`).
+* Comparing pre- vs post-review OpenAPI specifications.
+* Browsing generated FastAPI models and routers.
+* Executing live sandboxed Pytest tests.
+* Visualizing the 8 research metrics in interactive charts.
 
 ---
 
@@ -153,7 +185,10 @@ ai-project/
 │   ├── ui/
 │   │   └── dashboard.py        # Streamlit interactive dashboard
 │   └── cli.py                  # Typer terminal CLI
+├── demo_healthcare_api/        # Pre-generated, tested reference healthcare API
 ├── docs/                       # Research papers, survey, methodology
-├── tests/                      # Automated test suite
-└── pyproject.toml              # Build configuration
+├── tests/                      # Automated test suite (12 unit & e2e tests)
+├── .env                        # Local environment secrets (ignored by git)
+├── .gitignore                  # Git ignore rules
+└── pyproject.toml              # Package build configuration
 ```
