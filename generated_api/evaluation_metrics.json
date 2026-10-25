@@ -1,10 +1,10 @@
 {
-  "openapi_validation_accuracy": 100.0,
+  "openapi_validation_accuracy": 95.0,
   "rest_design_compliance": 100.0,
   "documentation_completeness": 100.0,
   "security_recommendation_coverage": 100.0,
-  "api_quality_score": 98.8,
-  "test_case_success_rate": 0.0,
+  "api_quality_score": 100.0,
+  "test_case_success_rate": 80.0,
   "execution_reliability": 100.0,
   "error_reduction_rate": 100.0
 }

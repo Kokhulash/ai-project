@@ -136,3 +136,11 @@ class APIForgeOrchestrator:
         if state.review_findings:
             with open(os.path.join(output_dir, "review_findings.json"), "w", encoding="utf-8") as f:
                 json.dump([f.model_dump() for f in state.review_findings], f, indent=2)
+                
+        if state.test_reports:
+            with open(os.path.join(output_dir, "test_reports.json"), "w", encoding="utf-8") as f:
+                json.dump([r.model_dump() for r in state.test_reports], f, indent=2)
+                
+        if state.traces:
+            with open(os.path.join(output_dir, "traces.json"), "w", encoding="utf-8") as f:
+                json.dump([t.model_dump() for t in state.traces], f, indent=2)

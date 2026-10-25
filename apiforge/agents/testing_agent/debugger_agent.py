@@ -7,6 +7,7 @@ to generate targeted patches and repair backend implementations.
 from __future__ import annotations
 import copy
 import logging
+import re
 from typing import Any, Dict
 from apiforge.core.llm import BaseLLMClient
 from apiforge.core.state import TestExecutionReport
@@ -54,9 +55,16 @@ class DebuggerAgent:
                     for fname, code in list(repaired.items()):
                         if fname.startswith("app/routers/"):
                             if "authorization" in code and "HTTPException(status_code=401" not in code:
-                                repaired[fname] = code.replace(
-                                    "def ",
-                                    "def ",
+                                repaired[fname] = re.sub(
+                                    r'(""".*?""")',
+                                    r'\1\n    if not authorization or not authorization.startswith("Bearer "):\n        raise HTTPException(status_code=401, detail="Missing or invalid bearer token")',
+                                    code,
+                                    flags=re.DOTALL
                                 )
+                
+                # Fix import errors
+                if "ModuleNotFoundError" in err or "ImportError" in err:
+                    if "app/routers/__init__.py" not in repaired:
+                        repaired["app/routers/__init__.py"] = ""
 
         return repaired

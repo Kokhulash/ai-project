@@ -1,0 +1,65 @@
+[
+  {
+    "rule_id": "REST-009",
+    "category": "security",
+    "severity": "warning",
+    "path": "paths./books.get",
+    "message": "Secured operation GET /books requires authentication but does not define 401 Unauthorized response.",
+    "recommendation": "Add 401 response with standard ErrorResponse schema.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "REST-009",
+    "category": "security",
+    "severity": "warning",
+    "path": "paths./books/{book_id}.get",
+    "message": "Secured operation GET /books/{book_id} requires authentication but does not define 401 Unauthorized response.",
+    "recommendation": "Add 401 response with standard ErrorResponse schema.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEC-101",
+    "category": "security",
+    "severity": "critical",
+    "path": "paths./books.post",
+    "message": "The `POST /books` endpoint's description explicitly states 'Rule 7: Only library staff or administrators are authorized to add, update, or delete books.' However, the `security` definition for this operation only specifies `bearerAuth: []`, which enforces authentication but does not define or enforce specific authorization roles (e.g., 'admin', 'staff'). This means any authenticated user could potentially create books, violating the stated business rule.",
+    "recommendation": "Define specific authorization scopes or roles within the security scheme (e.g., using `x-security-roles` or by defining scopes in an OAuth2 security scheme) and apply them to this operation. For example, if using OAuth2, define scopes like `admin:books` or `staff:books` and apply `security: [{ bearerAuth: ['admin:books'] }]`.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "BIZ-001",
+    "category": "rest_compliance",
+    "severity": "warning",
+    "path": "paths./books.get",
+    "message": "The global `security` definition applies `bearerAuth` to all operations by default. While `POST /books` requires authentication, `GET /books` (listing books) is typically a public read-only operation in a library system. Requiring authentication for this operation unnecessarily restricts access for unauthenticated users who might want to browse the catalog.",
+    "recommendation": "If this operation is intended to be publicly accessible, explicitly override the global security for this specific `GET` operation by setting `security: []` (an empty array) at the operation level. This indicates no authentication is required for this endpoint.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "BIZ-001",
+    "category": "rest_compliance",
+    "severity": "warning",
+    "path": "paths./books/{book_id}.get",
+    "message": "The global `security` definition applies `bearerAuth` to all operations by default. While `POST /books` requires authentication, `GET /books/{book_id}` (retrieving a specific book) is typically a public read-only operation in a library system. Requiring authentication for this operation unnecessarily restricts access for unauthenticated users who might want to view book details.",
+    "recommendation": "If this operation is intended to be publicly accessible, explicitly override the global security for this specific `GET` operation by setting `security: []` (an empty array) at the operation level. This indicates no authentication is required for this endpoint.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "BIZ-001 | SCHEMA-001",
+    "category": "business_logic",
+    "severity": "warning",
+    "path": "components.schemas.BookCreate",
+    "message": "The description for `POST /books` states 'Rule 10: Upon adding a new book, 'availableCopies' must be initialized to 'totalCopies'.' If the `BookCreate` schema (referenced by the request body) allows the client to provide a value for `availableCopies`, it creates a potential inconsistency. The client might provide a value that contradicts this rule, relying on the server to enforce it. While server-side enforcement is crucial, the API contract should ideally reflect this by either making `availableCopies` read-only or not present in the `BookCreate` schema, or clearly documenting that any provided `availableCopies` will be ignored/overridden.",
+    "recommendation": "Review the `BookCreate` schema. If `availableCopies` is present, consider making it `readOnly: true` or removing it from the `BookCreate` schema entirely, as its value is derived from `totalCopies` upon creation. Clearly document this behavior in the schema description if it must remain.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEC-102",
+    "category": "security",
+    "severity": "warning",
+    "path": "components.schemas.ErrorResponse",
+    "message": "The `ErrorResponse` schema is referenced for various error codes (400, 401, 422). Without the definition of `ErrorResponse`, there's a risk that it might expose sensitive internal server details (e.g., stack traces, internal error codes, database error messages) which could aid attackers in understanding the system's architecture or finding vulnerabilities.",
+    "recommendation": "Ensure the `ErrorResponse` schema is strictly defined to only include generic, user-friendly messages and a unique error code for client-side handling, without revealing implementation details. For example, it should only contain `code` (string, unique identifier for the error type) and `message` (string, human-readable description).",
+    "suggested_patch": null
+  }
+]

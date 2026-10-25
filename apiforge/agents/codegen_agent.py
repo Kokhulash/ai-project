@@ -48,6 +48,7 @@ class CodeGenerationAgent:
         main_code = self._generate_main_code(spec, router_names)
         files["app/main.py"] = main_code
         files["app/__init__.py"] = ""
+        files["app/routers/__init__.py"] = ""
 
         # 5. Requirements & Dockerfile
         files["requirements.txt"] = "fastapi>=0.110.0\nuvicorn>=0.29.0\npydantic>=2.7.0\npytest>=8.0.0\nhttpx>=0.27.0\n"
@@ -231,7 +232,7 @@ db = InMemoryStore()
                 func_params = []
                 path_params = re.findall(r"\{([a-zA-Z0-9_]+)\}", path_str)
                 for pp in path_params:
-                    func_params.append(f"{pp}: str = Path(...)")
+                    func_params.append(f"{pp}: str")
 
                 if method in ("post", "put", "patch") and "requestBody" in op:
                     rb = op["requestBody"]
@@ -247,7 +248,7 @@ db = InMemoryStore()
                     func_params.append("authorization: Optional[str] = Header(None)")
 
                 sig = ", ".join(func_params)
-                rlines.append(f"def {op_id}({sig}):")
+                rlines.append(f"async def {op_id}({sig}):")
 
                 # Function body
                 if op.get("security"):
@@ -310,7 +311,7 @@ db = InMemoryStore()
         lines.append(f'app = FastAPI(')
         lines.append(f'    title="{title}",')
         lines.append(f'    version="{version}",')
-        lines.append(f'    description="{desc}",')
+        lines.append(f'    description="""{desc}""",')
         lines.append(f'    openapi_url="/openapi.json",')
         lines.append(f'    docs_url="/docs",')
         lines.append(f'    redoc_url="/redoc",')

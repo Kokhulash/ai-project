@@ -271,6 +271,16 @@ class MockLLMClient(BaseLLMClient):
                         "description": "Deletes task by ID",
                         "auth_required": True,
                         "expected_status_codes": [204, 401, 404]
+                    },
+                    {
+                        "path": "/tasks/{task_id}",
+                        "method": "PUT",
+                        "summary": "Update task",
+                        "description": "Updates task status",
+                        "auth_required": True,
+                        "request_schema": "TaskUpdate",
+                        "response_schema": "TaskResponse",
+                        "expected_status_codes": [200, 400, 401, 404]
                     }
                 ],
                 "business_rules": [
@@ -278,6 +288,13 @@ class MockLLMClient(BaseLLMClient):
                     "Only authenticated users can create or modify projects and tasks"
                 ]
             }, indent=2)
+
+        if "semantic" in prompt_lower or "security audit" in prompt_lower or "logic" in prompt_lower:
+            return "[]"
+        if "openapi" in prompt_lower or "specification" in prompt_lower:
+            return "{}"
+        if "documentation" in prompt_lower or "markdown" in prompt_lower:
+            return "{}"
 
         return json.dumps({"status": "ok", "message": "Mock LLM completion"})
 

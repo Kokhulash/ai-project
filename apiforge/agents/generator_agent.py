@@ -141,6 +141,12 @@ Business Rules:
                 "properties": create_props
             }
 
+            schemas[f"{entity.name}Update"] = {
+                "type": "object",
+                "description": f"Payload for updating an existing {entity.name}",
+                "properties": create_props
+            }
+
             # List response schema with pagination
             schemas[f"{entity.name}ListResponse"] = {
                 "type": "object",

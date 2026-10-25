@@ -1,38 +1,65 @@
 [
   {
-    "rule_id": "SEC-101 | BIZ-001",
+    "rule_id": "REST-009",
     "category": "security",
     "severity": "warning",
-    "path": "paths./books.post",
-    "message": "The `POST /books` endpoint, which creates a new book record, is secured only by `bearerAuth` (authentication). Creating new resources is often a privileged operation that should be restricted to users with specific roles (e.g., 'admin', 'librarian') rather than any authenticated user.",
-    "recommendation": "Implement granular, role-based authorization checks for the `createBook` operation. This could involve defining specific security scopes in the OpenAPI specification (e.g., `bearerAuth: [ 'books:write' ]`) and ensuring the backend enforces these role-based permissions.",
+    "path": "paths./products.get",
+    "message": "Secured operation GET /products requires authentication but does not define 401 Unauthorized response.",
+    "recommendation": "Add 401 response with standard ErrorResponse schema.",
     "suggested_patch": null
   },
   {
-    "rule_id": "BIZ-001 | SEM-001 | SCHEMA-001",
-    "category": "business_logic",
-    "severity": "warning",
-    "path": "paths./books.post.description",
-    "message": "The description for `POST /books` states that `availableCopies` will be automatically initialized to `totalCopies` upon creation. This implies `availableCopies` should either not be included in the `BookCreate` schema, or if it is, any provided value must be ignored or explicitly validated. The absence of `BookCreate` and `Book` schema definitions prevents full verification of this business rule's consistency within the API's input/output contracts.",
-    "recommendation": "Explicitly define the `BookCreate` and `Book` schemas. Ensure `BookCreate` does not include `availableCopies` if it's an automatically derived field, or clearly document its behavior if present. The `Book` schema should include both `totalCopies` and `availableCopies`.",
-    "suggested_patch": null
-  },
-  {
-    "rule_id": "SEC-002 | SCHEMA-001",
+    "rule_id": "REST-009",
     "category": "security",
     "severity": "warning",
-    "path": "components.schemas.ErrorResponse",
-    "message": "The `ErrorResponse` schema is referenced for various error codes (400, 401, 404, 422) but its definition is missing. Without a clear schema, it's impossible to ensure that error responses do not inadvertently disclose sensitive internal information (e.g., stack traces, internal system details, database errors).",
-    "recommendation": "Define the `ErrorResponse` schema in `components/schemas`. It should be generic and avoid exposing implementation details. Typically, it includes fields like `code`, `message`, and optionally `details` (an array of specific error causes).",
+    "path": "paths./products/{id}.get",
+    "message": "Secured operation GET /products/{id} requires authentication but does not define 401 Unauthorized response.",
+    "recommendation": "Add 401 response with standard ErrorResponse schema.",
     "suggested_patch": null
   },
   {
-    "rule_id": "REST-001 | SCHEMA-001",
+    "rule_id": "SEC-101",
+    "category": "security",
+    "severity": "critical",
+    "path": "paths./products.post",
+    "message": "The 'createProduct' operation is described as requiring 'administrator privileges' but the specified security scheme 'bearerAuth' only indicates authentication, not specific roles or authorization scopes. This means any authenticated user could potentially create products, bypassing the intended access control.",
+    "recommendation": "Implement a robust authorization mechanism. This could involve defining specific OAuth2 scopes (e.g., 'admin:products:write') or integrating role-based access control (RBAC) checks, typically by inspecting claims within the JWT token provided via bearerAuth. The OpenAPI specification should reflect these required scopes/roles, for example, by adding 'scopes' to the security scheme definition or by documenting the expected JWT claims.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEM-001",
     "category": "rest_compliance",
+    "severity": "warning",
+    "path": "paths./products.get",
+    "message": "The 'listProducts' operation is described as 'Accessible to all users' but the global 'bearerAuth' security scheme applies to all operations by default. This creates a contradiction where unauthenticated users would be denied access despite the description.",
+    "recommendation": "To make this endpoint truly public, explicitly override the global security for this operation by setting `security: []` within the operation object. Alternatively, if authentication is indeed required, update the description to reflect that it's accessible to all *authenticated* users.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEM-001",
+    "category": "rest_compliance",
+    "severity": "warning",
+    "path": "paths./products/{id}.get",
+    "message": "The 'getProductById' operation is described as 'Accessible to all users' but the global 'bearerAuth' security scheme applies to all operations by default. This creates a contradiction where unauthenticated users would be denied access despite the description.",
+    "recommendation": "To make this endpoint truly public, explicitly override the global security for this operation by setting `security: []` within the operation object. Alternatively, if authentication is indeed required, update the description to reflect that it's accessible to all *authenticated* users.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEC-102",
+    "category": "information_disclosure",
     "severity": "info",
-    "path": "paths./books/{book_id}",
-    "message": "The OpenAPI specification provided is incomplete, specifically missing definitions for `PUT /books/{book_id}` and `DELETE /books/{book_id}`. Therefore, an audit of idempotency guarantees for these critical REST methods cannot be performed.",
-    "recommendation": "Complete the OpenAPI specification by defining all CRUD operations for the `/books/{book_id}` resource. Ensure `PUT` operations are fully idempotent (multiple identical requests have the same effect as a single request) and `DELETE` operations are also idempotent (deleting an already deleted resource should result in no further change, typically returning a 204 or 404).",
+    "path": "components.schemas",
+    "message": "Several schemas (ProductListResponse, ProductCreate, Product, ErrorResponse) are referenced but not defined in the 'components/schemas' section. Without their definitions, it's impossible to audit for potential information disclosure risks (e.g., sensitive internal IDs, cost prices, or stack traces in error responses).",
+    "recommendation": "Provide full definitions for all referenced schemas. Ensure that 'Product' schema does not expose sensitive internal data (e.g., internal database IDs, cost prices) to unauthorized users. Verify 'ErrorResponse' schema avoids exposing stack traces or overly verbose internal error details.",
+    "suggested_patch": null
+  },
+  {
+    "rule_id": "SEM-002",
+    "category": "schema_completeness",
+    "severity": "critical",
+    "path": "paths./products/{id}.put",
+    "message": "The OpenAPI specification is truncated, specifically within the definition of the PUT /products/{id} operation. This prevents a complete audit of this endpoint for business logic, security, and idempotency guarantees.",
+    "recommendation": "Provide the complete and valid OpenAPI specification to allow for a comprehensive audit.",
     "suggested_patch": null
   }
 ]

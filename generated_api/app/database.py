@@ -5,8 +5,9 @@ from typing import Dict, List, Any, Optional
 class InMemoryStore:
     def __init__(self):
         self.tables: Dict[str, Dict[str, Dict[str, Any]]] = {
-            "books": {},
-            "messageresponses": {},
+            "products": {},
+            "orders": {},
+            "orderitems": {},
         }
 
     def get_table(self, resource: str) -> Dict[str, Dict[str, Any]]:
