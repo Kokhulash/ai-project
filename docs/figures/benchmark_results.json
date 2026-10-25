@@ -1,0 +1,79 @@
+{
+  "suites": {
+    "healthcare": {
+      "metrics": {
+        "openapi_validation_accuracy": 95.0,
+        "rest_design_compliance": 100.0,
+        "documentation_completeness": 100.0,
+        "security_recommendation_coverage": 100.0,
+        "api_quality_score": 100.0,
+        "test_case_success_rate": 100.0,
+        "execution_reliability": 100.0,
+        "error_reduction_rate": 100.0
+      },
+      "review_iterations": 0,
+      "endpoints_count": 4,
+      "tests_passed": 5,
+      "tests_total": 5
+    },
+    "ecommerce": {
+      "metrics": {
+        "openapi_validation_accuracy": 95.0,
+        "rest_design_compliance": 100.0,
+        "documentation_completeness": 100.0,
+        "security_recommendation_coverage": 100.0,
+        "api_quality_score": 100.0,
+        "test_case_success_rate": 100.0,
+        "execution_reliability": 100.0,
+        "error_reduction_rate": 100.0
+      },
+      "review_iterations": 0,
+      "endpoints_count": 4,
+      "tests_passed": 5,
+      "tests_total": 5
+    },
+    "iot_fleet": {
+      "metrics": {
+        "openapi_validation_accuracy": 95.0,
+        "rest_design_compliance": 100.0,
+        "documentation_completeness": 100.0,
+        "security_recommendation_coverage": 100.0,
+        "api_quality_score": 100.0,
+        "test_case_success_rate": 100.0,
+        "execution_reliability": 100.0,
+        "error_reduction_rate": 100.0
+      },
+      "review_iterations": 0,
+      "endpoints_count": 4,
+      "tests_passed": 5,
+      "tests_total": 5
+    },
+    "task_management": {
+      "metrics": {
+        "openapi_validation_accuracy": 95.0,
+        "rest_design_compliance": 100.0,
+        "documentation_completeness": 100.0,
+        "security_recommendation_coverage": 100.0,
+        "api_quality_score": 100.0,
+        "test_case_success_rate": 100.0,
+        "execution_reliability": 100.0,
+        "error_reduction_rate": 100.0
+      },
+      "review_iterations": 0,
+      "endpoints_count": 4,
+      "tests_passed": 5,
+      "tests_total": 5
+    }
+  },
+  "aggregate_averages": {
+    "openapi_validation_accuracy": 95.0,
+    "rest_design_compliance": 100.0,
+    "documentation_completeness": 100.0,
+    "security_recommendation_coverage": 100.0,
+    "api_quality_score": 100.0,
+    "test_case_success_rate": 100.0,
+    "execution_reliability": 100.0,
+    "error_reduction_rate": 100.0
+  },
+  "total_suites_evaluated": 4
+}
